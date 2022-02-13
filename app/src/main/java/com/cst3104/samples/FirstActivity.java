@@ -1,7 +1,6 @@
-package com.cst2335.exercises;
+package com.cst3104.samples;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
