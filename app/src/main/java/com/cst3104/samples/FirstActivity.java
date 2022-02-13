@@ -1,4 +1,4 @@
-package com.cst2335.exercises;
+package com.cst3104.samples;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.cst2335.exercises.MyOpenHelper;
 
 import com.google.android.material.snackbar.Snackbar;
 

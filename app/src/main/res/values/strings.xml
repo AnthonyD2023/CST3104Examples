@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Exercises - Saving To SQLite </string>
+    <string name="app_name">Samples - Saving To SQLite </string>
     <string name="time_goes_here">Time goes here</string>
     <string name="message_goes_here">Message goes here</string>
     <string name="send">Send</string>
