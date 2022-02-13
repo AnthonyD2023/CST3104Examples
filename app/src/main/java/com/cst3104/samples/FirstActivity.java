@@ -1,4 +1,4 @@
-package com.cst2335.exercises;
+package com.cst3104.samples;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -10,13 +10,15 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+
+
 import java.util.ArrayList;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class FirstActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "FirstActivity";
 
     private ArrayList<String> elements = new ArrayList<>(  );
     MyListAdapter myAdapter;
