@@ -17,16 +17,16 @@ import java.util.Locale;
 
 public class FirstActivity extends AppCompatActivity {
 
-    ArrayList<String> listItems = new ArrayList<>();
-    ArrayAdapter<String> adapter;
-    private ListView myListView;
+    private ArrayList<String> listItems;
+    private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        myListView = findViewById(R.id.myListView);
+        ListView myListView = findViewById(R.id.myListView);
+        listItems = new ArrayList<>();
 
         adapter = new ArrayAdapter<>( this,
                 android.R.layout.simple_dropdown_item_1line,
