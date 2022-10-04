@@ -68,9 +68,6 @@ public class FirstActivity extends AppCompatActivity {
                     //An optional third button:
                     .setNeutralButton("Maybe", (click, arg) -> {  })
 
-                    //You can add extra layout elements:
-                    .setView(getLayoutInflater().inflate(R.layout.row_layout, null) )
-
                     //Show the dialog
                     .create().show();
             return true;
@@ -86,7 +83,7 @@ public class FirstActivity extends AppCompatActivity {
 
         public Object getItem(int position) { return "This is row " + position; }
 
-        public long getItemId(int position) { return (long) position; }
+        public long getItemId(int position) { return position; }
 
         public View getView(int position, View old, ViewGroup parent)
         {
@@ -98,9 +95,6 @@ public class FirstActivity extends AppCompatActivity {
             //set what the text should be for this row:
             TextView tView = newView.findViewById(R.id.textGoesHere);
             tView.setText( getItem(position).toString() );
-
-            //Button b =  newView.findViewById(R.id.textGoesHere);
-            //b.setText( getItem(position).toString() );
 
             //return it to be put in the table
             return newView;
