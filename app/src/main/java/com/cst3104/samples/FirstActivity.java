@@ -4,22 +4,16 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ListView;
 
-import com.cst2335.exercises.MyOpenHelper;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,22 +24,21 @@ import java.util.Locale;
 //This makes it a page in your application
 public class FirstActivity extends AppCompatActivity {
     //Create an OpenHelper to store data:
-    MyOpenHelper myOpener;
-    SQLiteDatabase theDatabase;
-    //use them anywhere in the class:
-    Button submit;
-    EditText edit;
-    RecyclerView rView;
-    MyAdapter theAdapter;
-    ArrayList<Message> messages = new ArrayList<>();
+    private SQLiteDatabase theDatabase;
 
     //need onCreate:
     @Override
     public void onCreate(Bundle p){
         super.onCreate(p);
-
         //load XML:
         setContentView(R.layout.activity_main);
+
+        MyOpenHelper myOpener;
+        Button submit;
+        EditText edit;
+        ListView lView;
+        ArrayAdapter<Message> theAdapter;
+        ArrayList<Message> messages = new ArrayList<>();
 
         //initialize it in onCreate
         myOpener = new MyOpenHelper( this );
@@ -66,28 +59,26 @@ public class FirstActivity extends AppCompatActivity {
         { //pointing to row 2
             int id = results.getInt(idIndex);
             String message = results.getString( messageIndex );
-            int sendOrRecieve = results.getInt(sOrRIndex);
             String time = results.getString( timeIndex);
 
             //add to arrayList:
             messages.add( new Message( message, time, id ));
         }
 
+        results.close();
+
         submit = findViewById(R.id.submitButton);
         edit = findViewById(R.id.editText);
-        rView = findViewById(R.id.myRecycleView);
+        lView = findViewById(R.id.myListView);
 
-        theAdapter = new MyAdapter();
-        rView.setAdapter( theAdapter ) ;
-        rView.setLayoutManager(new LinearLayoutManager(this));
-        //rView.setLayoutManager(new GridLayoutManager (this, 2) );
-
+        theAdapter = new ArrayAdapter<>( this, android.R.layout.simple_list_item_1, messages );
+        lView.setAdapter( theAdapter ) ;
 
         submit.setOnClickListener( click ->{
             String whatIsTyped = edit.getText().toString();
             Date timeNow = new Date(); //when was this code run
 
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss", Locale.getDefault());
 
             String currentDateandTime = sdf.format( timeNow ); //convert date to String
             //insert into database:
@@ -114,127 +105,38 @@ public class FirstActivity extends AppCompatActivity {
             edit.setText("");//clear the text
 
             //notify that new data was added at a row:
-            theAdapter.notifyItemInserted( messages.size() - 1 ); //at the end of ArrayList,
-            // call onCreateViewHolder, onBindViewHolder()
+            theAdapter.notifyDataSetChanged();
 
         });
 
-    }
+        lView.setOnItemClickListener( (click, view, position, id) ->  {
+            //which row was clicked.
+            Message whatWasClicked = messages.get(position);
 
-    public class MyAdapter extends RecyclerView.Adapter< MyViewHolder > {
+            AlertDialog.Builder builder = new AlertDialog.Builder( FirstActivity.this );
 
-        //It inflates the view hierarchy
-        //and creates an instance of the ViewHolder class
-        //initialized with the view hierarchy before
-        //returning it to the RecyclerView.
-        @NonNull
-        @Override
-        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            builder.setTitle("Question:")
+                .setMessage("Do you want to delete this:" + whatWasClicked.getMessageTyped())
+                .setNegativeButton("Negative", (dialog, click1)->{ })
+                .setPositiveButton("Positive", (dialog, click2)->{
+                    //actually delete something:
+                    messages.remove(position);
+                    theAdapter.notifyDataSetChanged();
+                    Snackbar.make(submit, "You removed item # " + position, Snackbar.LENGTH_LONG)
+                        .setAction("Undo", (click4)-> {
+                            messages.add(position, whatWasClicked);
+                            theAdapter.notifyDataSetChanged();
+                            //reinsert into the database
+                            theDatabase.execSQL( String.format(Locale.CANADA, " Insert into %s values (\"%d\", \"%s\", \"%d\", \"%s\" );",
+                                    MyOpenHelper.TABLE_NAME      , whatWasClicked.getId()  , whatWasClicked.getMessageTyped() , 1  , whatWasClicked.getTimeSent()));
 
-            //Load a new row from the layout file:
-            LayoutInflater li = getLayoutInflater();
-
-            //import layout for a row:
-            View thisRow = li.inflate(R.layout.sent_message, parent, false);
-
-            return new MyViewHolder( thisRow );
-        }
-
-
-        //Populates the view hierarchy within the ViewHolder object
-        //with the data to be displayed.
-        //It is passed the ViewHolder object and an integer
-        //value indicating the list item that is to be displayed.
-        //This data is then displayed on the layout views using the references
-        //created in the constructor method of the ViewHolder class
-        //initializes a Row at position in the data array
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position) { //need an ArrayList to hold all the messages.
-            //MyViewHolder has time and message textViews
-
-            // What message object is at position:
-            Message thisRow = messages.get(position);//
-
-            //                      String object:
-            holder.timeView.setText( thisRow.getTimeSent() );//what time goes on row position
-            holder.messageView.setText( thisRow.getMessageTyped() );//what message goes on row position
-        }
-
-        //returns the number of items in the array
-        @Override
-        public int getItemCount() {
-            return messages.size() ; //how many items in the list
-        }
-    }
-
-    //this holds TextViews on a row:
-    public class MyViewHolder extends RecyclerView.ViewHolder{
-        TextView timeView;
-        TextView messageView;
-
-        //View will be a ConstraintLayout
-        public MyViewHolder(View itemView) {
-            super(itemView);
-
-            timeView = itemView.findViewById(R.id.time);
-            messageView = itemView.findViewById(R.id.message);
-
-            itemView.setOnClickListener( click -> {
-                int position = getAdapterPosition();//which row was clicked.
-                Message whatWasClicked = messages.get(position);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder( FirstActivity.this );
-
-                builder.setTitle("Question:")
-                        .setMessage("Do you want to delete this:" + whatWasClicked.getMessageTyped())
-                        .setNegativeButton("Negative", (dialog, click1)->{ })
-                        .setPositiveButton("Positive", (dialog, click2)->{
-                            //actually delete something:
-                            messages.remove(position);
-                            theAdapter.notifyItemRemoved(position);
-                            Snackbar.make(submit, "You removed item # " + position, Snackbar.LENGTH_LONG)
-                                    .setAction("Undo", (click4)-> {
-                                        messages.add(position, whatWasClicked);
-                                        theAdapter.notifyItemInserted(position);
-                                        //reinsert into the database
-                                        theDatabase.execSQL( String.format( " Insert into %s values (\"%d\", \"%s\", \"%d\", \"%s\" );",
-                                                MyOpenHelper.TABLE_NAME      , whatWasClicked.getId()  , whatWasClicked.getMessageTyped() , 1  , whatWasClicked.getTimeSent()));
-
-                                    })
-                                    .show();
-                            //delete from database:, returns number of rows deleted
-                            theDatabase.delete(MyOpenHelper.TABLE_NAME,
-                                    MyOpenHelper.COL_ID +" = ?", new String[] { Long.toString( whatWasClicked.getId() )  });
-                        }).create().show();
-            });
-        }
-    }
-
-    public class Message{
-        String messageTyped;
-        String timeSent;
-        long id;
-
-        public Message(String messageTyped, String timeSent, long _id) {
-            this.messageTyped = messageTyped;
-            this.timeSent = timeSent;
-            this.id = _id;
-        }
-
-        public String getMessageTyped() {
-            return messageTyped;
-        }
-
-        public String getTimeSent() {
-            return timeSent;
-        }
-        public long getId() {
-            return id;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
+                        })
+                        .show();
+                    //delete from database:, returns number of rows deleted
+                    theDatabase.delete(MyOpenHelper.TABLE_NAME,
+                            MyOpenHelper.COL_ID +" = ?", new String[] { Long.toString( whatWasClicked.getId() )  });
+                }).create().show();
+        });
     }
 
 }
