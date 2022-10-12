@@ -22,9 +22,6 @@ public class MyOpenHelper extends SQLiteOpenHelper {
     // should be the creation statement
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //Create table MyData ( _id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT, SendOrReceive INTEGER, TimeSent TEXT );
-        //String result = String.format(" %s %s %s", "FirstString" , "10", "10.0" );
-
         //                                      //TABLE_NAME               take care of id numbers
         db.execSQL( String.format( "Create table %s ( %s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT, %s  INTEGER, %s TEXT );"
                 , TABLE_NAME, COL_ID,                       COL_MESSAGE, COL_SEND_RECEIVE, COL_TIME_SENT ) );
